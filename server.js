@@ -1,16 +1,44 @@
 
+const express = require('express');
+const { read } = require('node:fs');
+const app = express();
+const PORT = 3000;
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-
-const http = require('http');
-
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello, World!\n');
+app.get('/', async (req, res) => {
+    const data = await read('');
+    res.json(data);
 });
 
-const PORT = 3000;
-server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}/`);
+app.get('/new', (req, res) => {
+    res.sendFile(__dirname + '/Form/form.html');
+});
+
+app.post('/new', async (req, res) => {
+    const { title, body } = req.body;
+    await create('', title, body);
+    res.redirect('/');
+});
+
+app.get ('/edit/:id', (req, res) => {
+    res.sendFile(__dirname + '/Form/form.html');
+});
+
+app.post('/edit/:id', async (req, res) => {
+    const { id } = req.params;
+    const { title, body } = req.body;
+    await update(id, title, body);
+    res.redirect('/');
+});
+
+app.post('/delete/:id', async (req, res) => {
+    const { id } = req.params;
+    await deleteNote(id);
+    res.redirect('/');
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
