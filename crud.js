@@ -8,7 +8,7 @@ const client = new MongoClient(uri);
 
 
 
-async function create(note, title, body) {
+async function create(title, body) {
   try {
     await client.connect();
     const database = client.db('NoteDB');
@@ -27,7 +27,7 @@ async function read() {
     const database = client.db('NoteDB');
     const notes = database.collection('note');
     const allNotes = await notes.find({}).toArray();
-    console.log(allNotes);
+    return allNotes;
   }
     finally {
       await client.close();
@@ -42,7 +42,7 @@ async function update(id, title, body) {
     await client.connect();
     const database = client.db('NoteDB');
     const notes = database.collection('note');
-    await notes.updateOne({ _id: id }, { $set: { title: title, body: body } });
+    await notes.updateOne({ _id: new ObjectId(id) }, { $set: { title: title, body: body } });
     console.log('Note updated successfully!');
   }
     finally {
@@ -57,7 +57,7 @@ async function deleteNote(id) {
     await client.connect();
     const database = client.db('NoteDB');
     const notes = database.collection('note');
-    await notes.deleteOne({ _id: id });
+    await notes.deleteOne({ _id: new ObjectId(id) });
     console.log('Note deleted successfully!');
   }
     finally {
@@ -65,5 +65,7 @@ async function deleteNote(id) {
     }
   
 }
+
+module.exports = { create, read, update, deleteNote };
 
 
