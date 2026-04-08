@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Note</title>
+</head>
+<body>
+  <h1>Edit Note</h1>
+  <a href="/">← Back</a><br><br>
+ 
+  <form action="" method="POST" id="edit-form">
+    <label>Title<br>
+      <input type="text" name="title" id="title" />
+    </label><br><br>
+ 
+    <label>Body<br>
+      <textarea name="body" id="body" rows="6" cols="40"></textarea>
+    </label><br><br>
+ 
+    <button type="submit">Save</button>
+  </form>
+ 
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id    = params.get('id');
+    const title = params.get('title');
+    const body  = params.get('body');
+ 
+    document.getElementById('title').value = title;
+    document.getElementById('body').value  = body;
+    document.getElementById('edit-form').action = '/edit/' + id;
+  </script>
+</body>
+</html>
+ 

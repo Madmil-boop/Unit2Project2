@@ -1,19 +1,44 @@
 
 const express = require('express');
-const { read } = require('node:fs');
 const app = express();
+const { create, read, update, deleteNote } = require('./crud');
 const PORT = 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+
 app.get('/', async (req, res) => {
-    const data = await read('');
-    res.json(data);
+    const notes = await read();
+    const noteItems = notes.map(note => `
+        <li>
+            <strong>${note.title}</strong> — ${note.body}
+            <a href="/edit/${note._id}">Edit</a>
+            <form action="/delete/${note._id}" method="POST" style="display:inline">
+                <button type="submit">Delete</button>
+            </form>
+        </li>
+    `).join('');
+ 
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head><title>My Notes</title></head>
+        <body>
+            <h1>My Notes</h1>
+            <a href="/new"><button>+ Add Note</button></a>
+            <ul>${noteItems.length ? noteItems : '<li>No notes yet.</li>'}</ul>
+        </body>
+        </html>
+    `);
+});
 });
 
 app.get('/new', (req, res) => {
     res.sendFile(__dirname + '/Form/form.html');
+
+
 });
 
 app.post('/new', async (req, res) => {

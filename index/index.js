@@ -1,7 +1,7 @@
 function loadNotes() {
-  const notesList = document.getElementById('notes-list');
+  const notesList = document.getElementById('notes-list'); 
   notesList.innerHTML = ''; // Clear existing notes
-    fetch('/api/notes')
+    fetch('/api/notes') // Fetch notes from the server
     .then(response => response.json())
     .then(notes => {
       notes.forEach(note => {
