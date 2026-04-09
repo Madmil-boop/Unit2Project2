@@ -1,71 +1,47 @@
+﻿const fs = require('fs');
+const path = require('path');
 
-const { MongoClient, ObjectId} = require('mongodb');
-const uri = "mongodb+srv://mmiller827212_db_user:ZQM0zFxXh3FFprSi@notes.64upxgx.mongodb.net/?appName=Notes";
+const FILE = path.join(__dirname, 'notes.json');
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri);
+// Make sure the file exists
+if (!fs.existsSync(FILE)) {
+    fs.writeFileSync(FILE, '[]');
+}
 
+function getAll() {
+    return JSON.parse(fs.readFileSync(FILE));
+}
 
+function saveAll(notes) {
+    fs.writeFileSync(FILE, JSON.stringify(notes, null, 2));
+}
 
+function create(title, body) {
+    const notes = getAll();
+    const note = { id: Date.now().toString(), title, body };
+    notes.push(note);
+    saveAll(notes);
+    console.log('Note created!');
+}
 
-async function create(title, body) {
-  try {
-    await client.connect();
-    const database = client.db('NoteDB');
-    const notes = database.collection('note');
-    await notes.insertOne({ title: title, body: body });
-    console.log('Note created successfully!');
-  }
-    finally {
-      await client.close();
+function read() {
+    return getAll();
+}
+
+function update(id, title, body) {
+    const notes = getAll();
+    const i = notes.findIndex(n => n.id === id);
+    if (i !== -1) {
+        notes[i] = { id, title, body };
+        saveAll(notes);
+        console.log('Note updated!');
     }
 }
 
-async function read() {
-    try {
-    await client.connect();
-    const database = client.db('NoteDB');
-    const notes = database.collection('note');
-    const allNotes = await notes.find({}).toArray();
-    return allNotes;
-  }
-    finally {
-      await client.close();
-    }
-
-
-
-}
-
-async function update(id, title, body) {
-    try {
-    await client.connect();
-    const database = client.db('NoteDB');
-    const notes = database.collection('note');
-    await notes.updateOne({ _id: new ObjectId(id) }, { $set: { title: title, body: body } });
-    console.log('Note updated successfully!');
-  }
-    finally {
-      await client.close();
-    }
-
-  
-}
-
-async function deleteNote(id) {
-    try {
-    await client.connect();
-    const database = client.db('NoteDB');
-    const notes = database.collection('note');
-    await notes.deleteOne({ _id: new ObjectId(id) });
-    console.log('Note deleted successfully!');
-  }
-    finally {
-      await client.close();
-    }
-  
+function deleteNote(id) {
+    const notes = getAll().filter(n => n.id !== id);
+    saveAll(notes);
+    console.log('Note deleted!');
 }
 
 module.exports = { create, read, update, deleteNote };
-
-
