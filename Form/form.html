@@ -5,26 +5,21 @@
   <title>Note</title>
 </head>
 <body>
-  <h1 id="page-title">Add Note</h1>
-  <a href="/">← Back</a> 
-  <!--  Anchor tag to bring you back to the main page -->
- 
-  <br><br>
- <!-- Textbox to put title -->
-  <label>Title<br>
-    <input type="text" id="title" placeholder="Note title" />
-  </label>
- 
-  <br><br>
-  <!-- Body to put note content -->
-  <label>Details<br>
-    <textarea id="body" placeholder="Write your note..." rows="6" cols="40"></textarea>
-  </label>
- 
-  <br><br>
- <!-- Save button -->
-  <button id="save-btn">Save</button>
+  <h1>Add Note</h1>
+  <a href="/">← Back</a>
 
-  
+  <br><br>
+
+  <form action="/new" method="POST">
+    <label>Title<br>
+      <input type="text" name="title" placeholder="Note title" />
+    </label><br><br>
+
+    <label>Details<br>
+      <textarea name="body" placeholder="Write your note..." rows="6" cols="40"></textarea>
+    </label><br><br>
+
+    <button type="submit">Save</button>
+  </form>
 </body>
 </html>

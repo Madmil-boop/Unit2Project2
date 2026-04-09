@@ -13,7 +13,7 @@ app.get('/', async (req, res) => {
     const notes = await read();
     const noteItems = notes.map(note => `
         <li>
-            <strong>${note.title}</strong> — ${note.body}
+            <h1>${note.title}</h1> — ${note.body}
             <a href="/edit/${note._id}">Edit</a>
             <form action="/delete/${note._id}" method="POST" style="display:inline">
                 <button type="submit">Delete</button>
@@ -33,36 +33,36 @@ app.get('/', async (req, res) => {
         </html>
     `);
 });
-});
 
 app.get('/new', (req, res) => {
+    console.log(__dirname + '/Form/form.html');
     res.sendFile(__dirname + '/Form/form.html');
-
-
 });
 
 app.post('/new', async (req, res) => {
     const { title, body } = req.body;
-    await create('', title, body);
+    await create(title, body);
     res.redirect('/');
 });
 
-app.get ('/edit/:id', (req, res) => {
-    res.sendFile(__dirname + '/Form/form.html');
+app.get('/edit/:id', async (req, res) => {
+    const notes = await read();
+    const note = notes.find(n => n._id.toString() === req.params.id);
+    res.redirect(`/Form/edit.html?id=${note._id}&title=${encodeURIComponent(note.title)}&body=${encodeURIComponent(note.body)}`);
 });
 
 app.post('/edit/:id', async (req, res) => {
-    const { id } = req.params;
     const { title, body } = req.body;
-    await update(id, title, body);
+    await update(req.params.id, title, body);
     res.redirect('/');
 });
 
 app.post('/delete/:id', async (req, res) => {
-    const { id } = req.params;
-    await deleteNote(id);
+    await deleteNote(req.params.id);
     res.redirect('/');
 });
+
+app.use(express.static(__dirname + '/Form'));
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
