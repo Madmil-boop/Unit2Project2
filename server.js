@@ -12,7 +12,9 @@ app.get('/', async (req, res) => {
     const notes = read();
     const noteItems = notes.map(note => `
         <li>
-            <h1>${note.title}</h1> — ${note.body}
+            <h5>${note.title}</h5>
+            <p>${note.body}</p>
+            <br> </br>
             <a href="/edit/${note.id}">Edit</a>
             <form action="/delete/${note.id}" method="POST" style="display:inline">
                 <button type="submit">Delete</button>
