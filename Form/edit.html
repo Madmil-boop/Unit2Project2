@@ -1,35 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Edit Note</title>
+    <meta charset="UTF-8">
+    <title>Edit Note</title>
 </head>
 <body>
-  <h1>Edit Note</h1>
-  <a href="/">← Back</a><br><br>
+    <h1>Edit Note</h1>
+    <a href="/">← Back</a><br><br>
  
-  <form action="" method="POST" id="edit-form">
     <label>Title<br>
-      <input type="text" name="title" id="title" />
+        <input type="text" id="title" />
     </label><br><br>
  
     <label>Body<br>
-      <textarea name="body" id="body" rows="6" cols="40"></textarea>
+        <textarea id="body" rows="6" cols="40"></textarea>
     </label><br><br>
  
-    <button type="submit">Save</button>
-  </form>
+    <button onclick="saveNote()">Save</button>
  
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const id    = params.get('id');
-    const title = params.get('title');
-    const body  = params.get('body');
+    <script>
+        const id = new URLSearchParams(window.location.search).get('id'); 
  
-    document.getElementById('title').value = title;
-    document.getElementById('body').value  = body;
-    document.getElementById('edit-form').action = '/edit/' + id;
-  </script>
+        // Load existing note
+        fetch('/api/notes/' + id)
+            .then(res => res.json())
+            .then(note => {
+                document.getElementById('title').value = note.title;
+                document.getElementById('body').value  = note.body;
+            });
+            // Save the updated note by sending a PUT request to the server
+        function saveNote() {
+            const title = document.getElementById('title').value.trim(); 
+            const body  = document.getElementById('body').value.trim();
+ 
+            if (!title) { alert('Title is required'); return; }
+            
+             //similar to saveNote in form.html but sends a PUT request to update the existing note instead of creating a new one
+            fetch('/api/notes/' + id, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, body }) 
+            }).then(res => {
+                if (res.ok) window.location.href = '/';
+            });
+        }
+    </script>
 </body>
 </html>
  

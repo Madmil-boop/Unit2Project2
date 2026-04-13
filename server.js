@@ -1,96 +1,64 @@
+// server.js
+// This file sets up an Express server to handle CRUD operations for notes. It serves HTML pages for creating and editing notes, and provides API endpoints for managing notes in a JSON file.
 
 const express = require('express');
 const app = express();
-const { create, read, update, deleteNote } = require('./crud');
+const { create, getAll, update, deleteNote } = require('./crud');
 const PORT = 3000;
-
+ 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.get('/', async (req, res) => {
-  try {
-    const notes = read();
-    const noteItems = notes.map(note => `
-        <li>
-            <h5>${note.title}</h5>
-            <p>${note.body}</p>
-            <br> </br>
-            <a href="/edit/${note.id}">Edit</a>
-            <form action="/delete/${note.id}" method="POST" style="display:inline">
-                <button type="submit">Delete</button>
-            </form>
-        </li>
-    `).join('');
-
-    res.send(`
-        <!DOCTYPE html>
-        <html>
-        <head><title>My Notes</title></head>
-        <body>
-            <h1>My Notes</h1>
-            <a href="/new"><button>+ Add Note</button></a>
-            <ul>${noteItems.length ? noteItems : '<li>No notes yet.</li>'}</ul>
-        </body>
-        </html>
-    `);
-  } catch (error) {
-    console.error('HOME ROUTE ERROR:', error);
-    res.status(500).send('Unable to load notes.');
-  }
+app.use(express.static(__dirname + '/Form')); 
+ 
+// Serve HTML pages
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
 });
-
+// Route to serve the form for creating a new note
 app.get('/new', (req, res) => {
-  res.sendFile(__dirname + '/Form/form.html');
+    res.sendFile(__dirname + '/Form/form.html');
+});
+// Route to serve the form for editing an existing note
+app.get('/edit-form', (req, res) => {
+    res.sendFile(__dirname + '/Form/edit.html');
+});
+ 
+// API endpoints for CRUD operations
+app.get('/api/notes', (req, res) => {
+    const notes = getAll();
+    res.json(notes); 
 });
 
-app.post('/new', async (req, res) => {
-  try {
+// get a single note by ID
+app.get('/api/notes/:id', (req, res) => {
+    const notes = getAll();
+    const note = notes.find(n => n.id === req.params.id);
+    if (!note) return res.status(404).json({ error: 'Note not found' });
+    res.json(note);
+});
+
+// create a new note
+//
+app.post('/api/notes', (req, res) => {
     const { title, body } = req.body;
     create(title, body);
-    res.redirect('/');
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Unable to save note.');
-  }
+    res.json({ success: true });
 });
-
-app.get('/edit-form', (req, res) => {
-  res.sendFile(__dirname + '/Form/edit.html');
-});
-
-app.get('/edit/:id', (req, res) => {
-  try {
-    const notes = read();
-    const note = notes.find(n => n.id === req.params.id);
-    if (!note) return res.status(404).send('Note not found');
-    res.redirect(`/edit-form?id=${note.id}&title=${encodeURIComponent(note.title)}&body=${encodeURIComponent(note.body)}`);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Unable to load note for editing.');
-  }
-});
-
-app.post('/edit/:id', (req, res) => {
-  try {
+ 
+// update an existing note
+app.put('/api/notes/:id', (req, res) => {
     const { title, body } = req.body;
     update(req.params.id, title, body);
-    res.redirect('/');
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Unable to update note.');
-  }
+    res.json({ success: true });
 });
-
-app.post('/delete/:id', (req, res) => {
-  try {
+ 
+// delete a note
+app.delete('/api/notes/:id', (req, res) => {
     deleteNote(req.params.id);
-    res.redirect('/');
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Unable to delete note.');
-  }
+    res.json({ success: true });
 });
-
+ 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
+ 

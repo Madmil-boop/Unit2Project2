@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Notes</title>
+    <style>
+    a.edit-btn, button.delete-btn {
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    a.edit-btn {
+        background: #4a90e2;
+        color: white;
+        border: none;
+    }
+
+    button.delete-btn {
+        background: #e24a4a;
+        color: white;
+        border: none;
+    }
+</style>
+
+</head>
+<body>
+    <h1>My Notes</h1>
+    <button onclick="window.location.href='/new'">+ Add Note</button>
+ 
+    <ul id="notes-list"></ul>
+ 
+    <script>
+
+        // Load notes from the server and display them
+        function loadNotes() {
+    fetch('/api/notes')
+        .then(res => res.json()) 
+        .then(notes => { 
+            const list = document.getElementById('notes-list'); 
+            list.innerHTML = ''; 
+ 
+            if (notes.length === 0) {
+                list.innerHTML = '<li>No notes yet.</li>';
+                return;
+            }
+
+
+            // Create list items for each note with Edit and Delete options
+            // https://www.geeksforgeeks.org/javascript/how-to-creating-html-list-from-javascript-array/ 
+            notes.forEach(note => { 
+                const li = document.createElement('li');
+                li.innerHTML =
+                    '<h3>' + note.title + '</h3> — ' + note.body + '<br></br>' +
+                    ' <a class="edit-btn" href="/edit-form?id=' + note.id + '">Edit</a>' +
+                    ' <button class="delete-btn" onclick="deleteNote(\'' + note.id + '\')">Delete</button>';
+                list.appendChild(li);
+            });
+        })
+        .catch(() => {
+            document.getElementById('notes-list').innerHTML = '<li>Could not load notes.</li>';
+        });
+}
+ 
+function deleteNote(id) {
+    if (!confirm('Delete this note?')) return; 
+    fetch('/api/notes/' + id, { method: 'DELETE' }) 
+        .then(res => { if (res.ok) loadNotes(); });
+}
+ 
+loadNotes();
+    </script>
+</body>
+</html>
